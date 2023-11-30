@@ -2,12 +2,30 @@
 
 set -u
 
+# v2.43+
+install_git() {
+  # 不用 git -v 识别, ubuntu 16.04 自带的 git 2.7 不支持 -v
+  git --version 1> /dev/null 2> /dev/null
+  if [ $? -eq 127 ]; then
+    # if not use this repo, default 2.40 will be installed
+    sudo add-apt-repository ppa:git-core/ppa
+    sudo apt update
+    sudo apt install git -y
+  else
+    git config --global core.autocrlf input
+    # if not, access git.yoctoproject.org will get a prompt: xxx verification failed
+    git config --global http.sslVerify "false"
+
+    echo "- git \t\t ok!"
+  fi
+}
+
 # include: tar
 init_tools() {
   tar --version 1> /dev/null
   if [ $? -eq 127 ]; then sudo apt install -y tar
   fi
-
+  
   sudo apt-get update
   sudo apt-get install -y \
     g++ \
@@ -36,21 +54,25 @@ install_uboot() {
   if [ ! -d u-boot-hiwooya ]; then
     git clone --depth 1 https://github.com/hi-wooya/u-boot-hiwooya.git
   else
-    echo "repo have downloaded!"
+    echo "repo u-boot have downloaded!"
   fi
-  cd u-boot*
-    sudo rm -rf /opt/buildroot-gcc342 2> /dev/null
-    if [ ! -d '/opt/mips-2012.03' ]; then
-      sudo tar xvfj buildroot-gcc* -C /opt/
-      # rename cross gcc to default dir 
-      sudo mv '/opt/buildroot-gcc342/' '/opt/mips-2012.03'
-    fi
-    make clean
-    # only 7628, error will appears if select 7621
-    make menuconfig 
-    make 
-  cd ..
-  echo "- u-boot \t ok!"
+  local op=0
+  read -p "need to install u-roob? [Y/n] " op
+  case $op in
+    Y | y | 1) cd u-boot*
+      sudo rm -rf /opt/buildroot-gcc342 2> /dev/null
+      if [ ! -d '/opt/mips-2012.03' ]; then
+        sudo tar xvfj buildroot-gcc* -C /opt/
+        # rename cross gcc to default dir 
+        # sudo mv '/opt/buildroot-gcc342/' '/opt/mips-2012.03'
+      fi
+      make clean
+      # only 7628, error will appears if select 7621
+      make menuconfig 
+      make 
+    cd .. ;;
+    *) echo "- u-boot \t ok!"
+  esac
 }
 
 install_openWrt() {
@@ -83,6 +105,7 @@ install_openWrt() {
 init_tools
 
 echo "- env --- start --- "
+install_git
 init_64need32
 install_uboot
 
