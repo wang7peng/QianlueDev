@@ -76,13 +76,6 @@ install_uboot() {
 }
 
 install_openWrt() {
-  if [ ! -d 'openwrt-hiwooya'  ]; then
-    git clone --depth 1 https://github.com/hi-wooya/openwrt-hiwooya.git
-  else
-    echo "repo openwrt have downloaded!"
-  fi
-
-  cd openwrt-hi*
   ./scripts/feeds update -a
   ./scripts/feeds install -a
   # use default config directly
@@ -97,7 +90,6 @@ install_openWrt() {
   else
     make V=99
   fi
-  cd ..
 }
 
 # ----- ----- main ----- -----
@@ -111,4 +103,17 @@ install_uboot
 
 echo "- env --- setok --- "
 
-install_openWrt
+if [ ! -d 'openwrt-hiwooya'  ]; then
+  git clone --depth 1 https://github.com/hi-wooya/openwrt-hiwooya.git
+else
+  echo "repo openwrt have downloaded!"
+fi
+
+cd openwrt-hiwooya
+# only compile it when the suffix .bin file not exist
+numbers=`find bin/ -maxdepth 2 | grep '.bin' | wc -l`
+if [ $numbers -lt 1 ]; then install_openWrt
+fi
+
+ls -sh --color=auto bin/*/
+cd ..
