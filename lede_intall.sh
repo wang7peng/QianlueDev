@@ -71,11 +71,11 @@ install_python2() {
   python2 -V 2> /dev/null
   if [ $? -eq 127 ]; then
     cd /opt
-    if [ ! -f Python-2.7.18.tgz]; then
+    if [ ! -f Python-2.7.18.tgz ]; then
       sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
     fi
-    sudo tar zxf Python
-    cd Py*
+    sudo tar zxf Python*
+    cd Python-2.7.18
     sudo ./configure --enable-optimizations
     sudo make altinstall
     sudo ln -sfn '/usr/local/bin/python2.7' /usr/bin/python2

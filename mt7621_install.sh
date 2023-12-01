@@ -20,6 +20,25 @@ install_git() {
   fi
 }
 
+# v2.7.18
+install_python2() {
+  python2 -V 2> /dev/null
+  if [ $? -eq 127 ]; then
+    cd /opt
+    if [ ! -f Python-2.7.18.tgz ]; then
+      sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+    fi
+    sudo tar zxf Python*
+    cd Python-2.7.18
+    sudo ./configure --enable-optimizations
+    sudo make altinstall
+    sudo ln -sfn '/usr/local/bin/python2.7' /usr/bin/python2
+    sudo update-alternatives --config python
+  else
+    echo "- python2 \t ok!"
+  fi
+}
+
 # include: tar
 init_tools() {
   tar --version 1> /dev/null
@@ -100,7 +119,7 @@ echo "- env --- start --- "
 install_git
 init_64need32
 install_uboot
-
+install_python2
 echo "- env --- setok --- "
 
 if [ ! -d 'openwrt-hiwooya'  ]; then
