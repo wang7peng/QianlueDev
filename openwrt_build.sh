@@ -56,7 +56,7 @@ compile_openwrt() {
 checkenv
 
 op=0
-read -p "Let's compile openwrt in $check_sys? [Y/n] " op
+read -p "Let's compile openwrt in `check_sys`? [Y/n] " op
 case $op in
   Y | y | 1) ;;
   *) exit
