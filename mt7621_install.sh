@@ -48,7 +48,7 @@ init_tools() {
   fi
 
   awk -V 2> /dev/null
-  if [ $? -eq 127 ]; then sudo apt install -y gawk
+  if [[ $? -eq 2 || $? -eq 127 ]]; then sudo apt install -y gawk;
   fi
 
   sudo apt-get install -y \
