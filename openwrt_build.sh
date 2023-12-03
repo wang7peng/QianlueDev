@@ -5,9 +5,10 @@ set -u
 # include: python3 gcc
 checkenv() {
   # GNU Awk v5.1
-  awk -V 2> /dev/null
+  awk -V 2> /dev/null 1> /dev/null
   if [[ $? -eq 2 || $? -eq 127 ]]; then sudo apt install -y gawk;
   fi
+  awk -V | head -n 1
 
   # default v3.5.2 in Ubuntu1604
   python3 -V 2> /dev/null
@@ -15,7 +16,17 @@ checkenv() {
   fi
   G_verPy3=$(python3 -V | awk '{print $2}')
 
+  gcc 2> /dev/null
+  if [ $? -eq 127 ]; then echo "you need to install gcc first!"; exit;
+    # default v5.3 in Ubuntu1604
+    # default v11.4 in Ubuntu2204
+  fi
+  gcc --version | head -n 1
+
+  git config --global http.sslVerify false
+  git config --global core.autocrlf input
   # other condition
+
 }
 
 check_sys() {
@@ -48,7 +59,12 @@ compile_openwrt() {
   make menuconfig
 
   make download -j1 V=s
-  make
+  local op=1
+  read -p "set -j1 for make? (first compile?) [Y/n] " op
+  case $op in
+    Y | y | 1) make -j1;;
+    *) make
+  esac
 }
 
 # ----- ----- main ----- -----
