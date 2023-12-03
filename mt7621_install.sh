@@ -39,16 +39,21 @@ install_python2() {
   fi
 }
 
-# include: tar
+# include: tar awk
 init_tools() {
+  sudo apt-get update
+
   tar --version 1> /dev/null
   if [ $? -eq 127 ]; then sudo apt install -y tar
   fi
-  
-  sudo apt-get update
+
+  awk -V 2> /dev/null
+  if [ $? -eq 127 ]; then sudo apt install -y gawk
+  fi
+
   sudo apt-get install -y \
     g++ \
-    libncurses5-dev subversion libssl-dev gawk libxml-parser-perl \
+    libncurses5-dev subversion libssl-dev libxml-parser-perl \
     unzip wget xz-utils build-essential ccache gettext xsltproc  
   sudo apt install -y zlib1g zlib1g-dev # not zlibc
 

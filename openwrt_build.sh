@@ -4,6 +4,11 @@ set -u
 
 # include: python3 gcc
 checkenv() {
+  # GNU Awk v5.1
+  awk -V 2> /dev/null
+  if [ $? -eq 127 ]; then sudo apt install -y gawk;
+  fi
+
   # default v3.5.2 in Ubuntu1604
   python3 -V 2> /dev/null
   if [ $? -eq 127 ]; then echo "you need to install python3 first!"; exit;
