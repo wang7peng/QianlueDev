@@ -18,6 +18,13 @@ checkenv() {
   # other condition
 }
 
+check_sys() {
+  # cat /proc/version | grep -q -i "ubuntu"
+  grep -i ubuntu --silent /proc/version
+  if [ $? -eq 0 ]; then echo "ubuntu"
+  else echo "unknown"
+  fi
+}
 
 # rules:
 #       ubuntu1604 default -> 2102
@@ -47,6 +54,13 @@ compile_openwrt() {
 # ----- ----- main ----- -----
 
 checkenv
+
+op=0
+read -p "Let's compile openwrt in $check_sys? [Y/n] " op
+case $op in
+  Y | y | 1) ;;
+  *) exit
+esac
 
 ver=`select_version` 
 branch=openwrt-${ver:0:2}.${ver:0-2}
