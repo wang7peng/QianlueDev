@@ -15,6 +15,8 @@ checkenv() {
   if [ $? -eq 127 ]; then echo "you need to install python3 first!"; exit;
   fi
   G_verPy3=$(python3 -V | awk '{print $2}')
+  # e.g. python3.10-dev
+  sudo apt install -y python${G_verPy3%.*}-dev
 
   gcc 2> /dev/null
   if [ $? -eq 127 ]; then echo "you need to install gcc first!"; exit;
@@ -22,6 +24,10 @@ checkenv() {
     # default v11.4 in Ubuntu2204
   fi
   gcc --version | head -n 1
+
+  swig 2> /dev/null
+  if [ $? -eq 127 ]; then sudo apt install -y swig
+  fi
 
   git config --global http.sslVerify false
   git config --global core.autocrlf input
