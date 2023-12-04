@@ -9,6 +9,7 @@
 ```bash
 sudo apt install -y gcc g++  # c
 sudo apt install -y python3-distutils
+sudo apt install -y python3-setuptools
 ```
 
 
