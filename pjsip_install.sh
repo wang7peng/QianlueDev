@@ -18,6 +18,7 @@ install_make() {
 
 check_env() {
   sudo apt-get install -y libasound2-dev
+  sudo apt install -y libssl-dev libgl-dev
 
   # check gnu C
   gcc 2> /dev/null

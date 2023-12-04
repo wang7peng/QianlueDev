@@ -26,6 +26,15 @@ sudo apt install -y python3-setuptools
 > - CPU: MediaTek MT7621AT
 > - DRAM: 128 M
 
+【pjsip_install.sh】这个库安装完成后，运行自己项目时，还要先安装两个东西
+
+```bash
+sudo apt install -y libssl-dev  # libssl.so
+sudo apt install -y libgl-dev   # -lGL
+```
+
+
+
 ## 脚本写法 Tips
 
 - 想把函数输出给变量，尽量不用 return $ 这种写法, 他返回的值只能是 0-255 的整数（实质是状态码），在最后一行打 echo 更好。
