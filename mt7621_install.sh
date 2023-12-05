@@ -55,8 +55,17 @@ init_tools() {
   # awk -V | head -n 1
   awk --version | head --lines=1
 
+  # 代码不要支持c++17, gcc-11+ 默认支持 c++17，需要 gcc10以下版本 
+  verGcc=$(gcc --version | head --lines=1 | awk '{print $4}')
+  if [ ${verGcc%%.*} -ge 11 ]; then 
+    sudo apt install -y gcc-10 g++-10
+    sudo rm -rf /usr/bin/gcc /usr/bin/g++
+    sudo ln -s /usr/bin/gcc-10 /usr/bin/gcc
+    sudo ln -s /usr/bin/g++-10 /usr/bin/g++
+  fi
+  gcc --version | head --lines=1
+
   sudo apt-get install -y \
-    g++ \
     libncurses5-dev subversion libssl-dev libxml-parser-perl \
     unzip wget xz-utils build-essential ccache gettext xsltproc  
   sudo apt install -y zlib1g zlib1g-dev # not zlibc
