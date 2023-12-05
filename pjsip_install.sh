@@ -28,9 +28,13 @@ check_env() {
 
   # check gnu make
   make -v 1> /dev/null 2> /dev/null
-  if [ $? -eq 127 ]; then install_make
+  if [ $? -eq 127 ]; then sudo apt install -y make
   fi
-  make -v | head -n 1 
+
+  # make -v | head -n 1
+  local ver=$(make --version | head --lines=1 | awk '{print $3}')
+  if [ ${ver%%.*} -lt 4 ]; then install_make
+  fi  
 }
 
 # opus v1.4
@@ -44,7 +48,9 @@ install_opus() {
 
   tar -xzf opus.tar.gz
   cd opus-1.4
-  ./configure --prefix=/usr/local/etc/opus
+  # 生成的两个目录 include 和 lib 直接和 /usr/local 下的合并
+  # 如果单独存放到其他地方，需要额外设置环境变量
+  ./configure --prefix=/usr/local/
   make
   sudo make install
   cd ..
