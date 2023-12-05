@@ -80,6 +80,8 @@ install_python2() {
     sudo make altinstall
     sudo ln -sfn '/usr/local/bin/python2.7' /usr/bin/python2
     sudo update-alternatives --config python
+    cd ..
+    cd ~/Desktop
   else
     echo "- python2 \t ok!"
   fi
