@@ -34,6 +34,8 @@ install_python2() {
     sudo make altinstall
     sudo ln -sfn '/usr/local/bin/python2.7' /usr/bin/python2
     sudo update-alternatives --config python
+    cd ..
+    cd ~/Desktop
   else
     echo "- python2 \t ok!"
   fi
@@ -47,9 +49,11 @@ init_tools() {
   if [ $? -eq 127 ]; then sudo apt install -y tar
   fi
 
-  awk -V 2> /dev/null
+  awk -V 2> /dev/null 1> /dev/null
   if [[ $? -eq 2 || $? -eq 127 ]]; then sudo apt install -y gawk;
   fi
+  # awk -V | head -n 1
+  awk --version | head --lines=1
 
   sudo apt-get install -y \
     g++ \
@@ -86,7 +90,8 @@ install_uboot() {
     Y | y | 1) cd u-boot*
       sudo rm -rf /opt/buildroot-gcc342 2> /dev/null
       if [ ! -d '/opt/mips-2012.03' ]; then
-        sudo tar xvfj buildroot-gcc* -C /opt/
+        sudo tar xfj buildroot-gcc* -C /opt/
+        echo "tar content of gcc342--> /opt ok"
         # rename cross gcc to default dir 
         # sudo mv '/opt/buildroot-gcc342/' '/opt/mips-2012.03'
       fi
@@ -139,5 +144,8 @@ numbers=`find bin/ -maxdepth 2 | grep '.bin' | wc -l`
 if [ $numbers -lt 1 ]; then install_openWrt
 fi
 
-ls -sh --color=auto bin/*/
+ls -sh --color=auto bin/*/ 2> /dev/null
+if [ $? -eq 2 ]; then echo "compile failure." 
+fi
+
 cd ..
