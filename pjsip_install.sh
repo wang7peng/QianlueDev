@@ -33,10 +33,34 @@ check_env() {
   make -v | head -n 1 
 }
 
+# opus v1.4
+install_opus() {
+  if [ ! -f 'opus-1.4.tar.gz' ]; then
+    wget --no-verbose --tries=1	-O 'opus.tar.gz' \
+      https://downloads.xiph.org/releases/opus/opus-1.4.tar.gz # 1.1M
+  else
+    echo "pkg opus-1.4 have downloaded!"
+  fi
+
+  tar -xzf opus.tar.gz
+  cd opus-1.4
+  ./configure --prefix=/usr/local/etc/opus
+  make
+  sudo make install
+  cd ..
+}
+
 # ----- ----- main ----- -----
 check_env
 
 dirSrc="pjproject-2.14"
+
+op=0
+read -p "add additional lib opus? [Y/n] " op
+case $op in
+  Y | y | 1) install_opus;;
+  *)
+esac 
 
 # get pkg of pjsip
 if [ ! -f ${dirSrc}.tar.gz ]; then
