@@ -2,8 +2,14 @@
 
 set -u
 
-# include: tree wget vim
+# include: awk tree wget vim ncurses
 init_tools() {
+  # GNU Awk v5.1
+  awk -V 2> /dev/null 1> /dev/null
+  if [[ $? -eq 2 || $? -eq 127 ]]; then sudo apt install -y gawk;
+  fi
+  awk -V | head -n 1
+
   tree --version 1> /dev/null
   if [ $? -eq 127 ]; then sudo apt install -y tree
   fi
@@ -15,6 +21,8 @@ init_tools() {
   vim --version 1> /dev/null
   if [ $? -eq 127 ]; then sudo apt install -y vim
   fi
+ 
+  sudo apt install -y libncurses5-dev libz-dev
 
 }
 
@@ -58,7 +66,7 @@ install_go() {
   # 127 means command not found, need install
   if [ $? -eq 127 ]; then
     cd /opt
-    sudo wget https://go.dev/dl/go1.21.4.linux-amd64.tar.gz
+    sudo wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
     sudo tar -C /usr/local/etc/ -zxf go1.2*
     sudo ln -s /usr/local/etc/go/bin/* /usr/local/bin/
   else
