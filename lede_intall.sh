@@ -23,7 +23,8 @@ init_tools() {
   fi
  
   sudo apt install -y libncurses5-dev libz-dev
-
+  # python3 relate
+  sudo apt install -y python3-distutils
 }
 
 # v2.43+
@@ -96,34 +97,44 @@ install_python2() {
 }
 
 # v23.6+
-install_lede() {
-  local tag=20230609
-  read -p "will clone tag $1? [default $tag] [Y/n] " op
-  case $op in 
-    Y | y | 1) tag=$1;;
-    *)  
+download_lede() {
+  local op=0
+  if [ -d lede ]; then
+    read -p "lede repo have exist, need download it again?" op
+    case $op in 
+      Y | y | 1) rm -rf lede 
+        git clone --depth 1 -b $tag https://github.com/coolsnowwolf/lede.git;; 
+      *)  echo "lede repo have exist."
+    esac
+  else
+    read -p "will clone tag $1? [Y/n] " op
+    case $op in 
+      Y | y | 1) 
+        git clone --depth 1 -b $tag https://github.com/coolsnowwolf/lede.git;; 
+      *)  echo "lede repo have not download."
+    esac
+  fi
+}
+
+# add new lib in openwrt (insert link in the first row)
+update_lede() {
+  local op=0
+  local content="libqt"
+  # qt env
+  read -p "add qt5? [Y/n] " op
+  case $op in
+    Y | y | 1) content=`head --lines=1 feeds.conf.* | awk '{print $2}'`
+    # 在首行插入 libqt 的连接
+      if [ $content == 'libqt' ]; then
+        echo "libqt ok"
+      else
+        sed -i '1 i src-git libqt https://github.com/wang7peng/qt5-openwrt.git' feeds.conf.default
+      fi;;
+    *)
   esac
-  if [ ! -d lede ]; then
-    echo "get special tag: $tag"
-    git clone --depth 1 -b $tag https://github.com/coolsnowwolf/lede.git
-  else
-    echo "lede repo have download."
-  fi
-  cd lede
-  local numbers_pkg=`ls dl/ | wc -l`
-  # after build, total 173 packages will show up in this dl directory
-  if [ $numbers_pkg -lt 173 ]; then
-    ./scripts/feeds update -a
-    ./scripts/feeds install -a
-    # then will appears a UI menu to config yourself
-    make menuconfig
-    make download -j8
-    # must to set up thread (-j1), otherwise this script will stuck.
-    make V=s -j1
-  else
-    echo "build ok!"
-  fi
-  cd ..
+
+  ./scripts/feeds update -a
+  ./scripts/feeds install -a
 }
 
 # ----- -----  main()  ----- -----
@@ -141,8 +152,51 @@ echo "- env --- setok --- -"
 op=0
 read -p "install lede? [Y/n] " op
 case $op in 
-  Y | y | 1) install_lede 20230609
-    tree -C -sh -L 2 lede/bin/targets/x86
-  ;;
-  *) echo "lede not installed!"
+  Y | y | 1) ;;
+  *) echo "lede not installed!"; exit
 esac
+
+# step 1 select special version
+tag="20230609"
+op=1
+read -p  "which version?
+  [1] 20230609	  [2] 20221001  [3] 20211107
+select (default 2023.10) > " op
+case $op in 
+  3) tag="20211107";;
+  2) tag="20221001";;
+  *) tag="20230609"
+esac
+
+# step 2 download_lede 20230609
+download_lede $tag
+
+cd lede
+# step 3 update packages
+update_lede
+
+# step 4 config it with a UI menu
+make menuconfig
+
+# step 5 download them and make
+make download -j1
+
+op=0
+read -p "start make -jx? [Y/n] " op 
+case $op in
+  # must to set up thread (-j1), otherwise this script will stuck.
+  Y | y | 1) make -j1 V=s;;
+  2) make -j2;;
+  *) echo "config ok, you can make now!"
+esac
+
+cd ..
+# step last, check
+numbers_pkg=`ls lede/dl/ | wc -l`
+# after build, total 173 packages will show up in this dl directory
+if [ $numbers_pkg -ge 173 ]; then echo "build ok!"
+else
+  echo "build failure, pkgs in dl/: $numbers_pkg"
+fi
+
+tree -C -sh -L 2 lede/bin/targets/x86
