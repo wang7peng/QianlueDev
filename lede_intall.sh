@@ -10,6 +10,12 @@ init_tools() {
   fi
   awk -V | head -n 1
 
+  # 一开始不装也通过验证, 在后期 make 的时候才被检测到, 不装不行
+  swig 2> /dev/null
+  if [ $? -eq 127 ]; then sudo apt install -y swig
+  fi
+  swig -version | head --lines=2 # first line have null strings 
+
   tree --version 1> /dev/null
   if [ $? -eq 127 ]; then sudo apt install -y tree
   fi
@@ -23,8 +29,6 @@ init_tools() {
   fi
  
   sudo apt install -y libncurses5-dev libz-dev
-  # python3 relate
-  sudo apt install -y python3-distutils
 }
 
 # v2.43+
@@ -55,7 +59,8 @@ install_gnu() {
   # ignore the prompt (fatal error: not input files)
   gcc 2> /dev/null
   if [ $? -eq 127 ]; then
-    sudo apt install -y gcc-13 g++-13
+    # default v9.4 in ubuntu 20.04
+    sudo apt install -y gcc g++
   else
     echo "- c/c++ \t ok!"
   fi
@@ -147,6 +152,10 @@ install_gnu   # gcc g++
 install_go
 install_cmake
 install_python2
+
+# python3 relate
+sudo apt install -y python3-distutils python-setuptools
+sudo apt install -y python-dev python3-dev  # need find <Python.h>
 echo "- env --- setok --- -"
 
 op=0
