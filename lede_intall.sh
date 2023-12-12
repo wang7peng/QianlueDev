@@ -133,7 +133,7 @@ update_lede() {
       if [ $content == 'libqt' ]; then
         echo "libqt ok"
       else
-        sed -i '1 i src-git libqt https://github.com/wang7peng/qt5-openwrt.git' feeds.conf.default
+        sed -i '1 i src-git libqt https://github.com/qianlue123/qt5-openwrt.git' feeds.conf.default
       fi;;
     *)
   esac
@@ -170,7 +170,7 @@ tag="20230609"
 op=1
 read -p  "which version?
   [1] 20230609	  [2] 20221001  [3] 20211107
-select (default 2023.10) > " op
+select (default $tag) > " op
 case $op in 
   3) tag="20211107";;
   2) tag="20221001";;
