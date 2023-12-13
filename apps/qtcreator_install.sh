@@ -2,6 +2,9 @@
 
 set -u
 
+# run .run need
+sudo apt install -y libxcb-xinerama0-dev
+# use cmd ggsetting
 sudo apt install -y libglib2.0-bin
 
 ver="12.0.1"
@@ -25,7 +28,7 @@ chmod +777 $pkgRun
 
 # sudo will install in /opt
 op=0
-echo "qt will install in root? (default not)" op
+read -p "qt will install in root? (default not)" op
 case $op in 
   Y | y | 1) sudo ./$pkgRun;;
   *) ./$pkgRun
