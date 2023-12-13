@@ -32,7 +32,7 @@ checkenv() {
   git config --global http.sslVerify false
   git config --global core.autocrlf input
   # other condition
-
+  sudo apt install -y ncurses*   # 6M
 }
 
 # 多重检测, 只跑平台 ubuntu 16+
