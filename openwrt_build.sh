@@ -58,10 +58,27 @@ select_version() {
   echo $[ret]
 }
 
-compile_openwrt() {
+# add new lib in openwrt (insert link in the first row)
+update_pkg() {
+  local op=0
+  local content="libqt"
+  # qt env
+  read -p "add qt5? [Y/n] " op
+  case $op in
+    Y | y | 1) content=`head --lines=1 feeds.conf.* | awk '{print $2}'`
+    # 在首行插入 libqt 的连接
+      if [ $content == 'libqt' ]; then echo "libqt ok"
+      else
+        sed -i '1 i src-git libqt https://github.com/qianlue123/qt5-openwrt.git' feeds.conf.default
+      fi;;
+    *)
+  esac
+
   ./scripts/feeds update -a
   ./scripts/feeds install -a
+}
 
+compile_openwrt() {
   make menuconfig
 
   make download -j1 V=s
@@ -95,6 +112,8 @@ if [ ! -d $dirSrc ]; then
 fi
 
 cd $dirSrc
+
+update_pkg
 
 compile_openwrt 
 
