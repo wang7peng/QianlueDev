@@ -35,11 +35,12 @@ checkenv() {
 
 }
 
+# 多重检测, 只跑平台 ubuntu 16+
 check_sys() {
   # cat /proc/version | grep -q -i "ubuntu"
   grep -i ubuntu --silent /proc/version
-  if [ $? -eq 0 ]; then echo "ubuntu"
-  else echo "unknown"
+  if [ $? -eq 0 ]; then echo `uname --nodename`
+  else exit
   fi
 }
 
