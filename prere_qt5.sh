@@ -46,7 +46,7 @@ clear_src() {
     sudo mv $dirName*.tar.gz /usr/local/src
   fi
 
-  if [ -d $dirName*]; then sudo rm -rf $dirName*
+  if [ -d $dirName* ]; then sudo rm -rf $dirName*
   fi
 }
 
