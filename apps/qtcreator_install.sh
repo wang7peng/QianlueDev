@@ -4,6 +4,8 @@ set -u
 
 # run .run need
 sudo apt install -y libxcb-xinerama0-dev
+# restart from lnk need
+sudo apt install -y libxcb-cursor0
 # use cmd ggsetting
 sudo apt install -y libglib2.0-bin
 
