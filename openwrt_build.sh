@@ -80,14 +80,15 @@ update_pkg() {
 }
 
 compile_openwrt() {
-  make menuconfig
-
   make download -j1 V=s
+
   local op=1
   read -p "set -j1 for make? (first compile?) [Y/n] " op
   case $op in
-    Y | y | 1) make -j1;;
-    *) make
+    Y | y | 1) make -j1 V=s;;
+    2) make -j2;;
+    4) make -j4;;
+    *) echo "config ok, you can make now!"; exit
   esac
 }
 
@@ -115,6 +116,8 @@ fi
 cd $dirSrc
 
 update_pkg
+
+make menuconfig
 
 compile_openwrt 
 
