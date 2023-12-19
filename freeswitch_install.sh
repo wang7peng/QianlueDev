@@ -35,11 +35,24 @@ check_env() {
   sudo apt-get build-dep freeswitch
 }
 
+install_libpcap() {
+  local pkgName=libpcap-1.10.4.tar.gz
+  if [ ! -f $pkgName ]; then
+    wget --no-verbose https://www.tcpdump.org/release/$pkgName
+  fi
+  tar -xzf $pkgName
+  cd ${pkgName%.tar*}
+  ./configure
+  make 
+  sudo make install
+  cd ..
+}
+
 check_env2() {
   sudo apt install -y \
 	libtool zlib1g-dev libcurl4-openssl-dev libpcre3-dev \
        	libopus-dev libspeex-dev libspeexdsp-dev libldns-dev libssl-dev \
-        liblua5.3-dev libshout-dev libmpg123-dev libmp3lame-dev \
+        libshout-dev libmpg123-dev libmp3lame-dev \
        	libsndfile-dev libopus-dev libedit-dev libnode-dev
 
   # picture
@@ -47,8 +60,11 @@ check_env2() {
 	  libtiff-dev libtiff5-dev libjpeg-dev
 
   sudo apt install --yes build-essential pkg-config \
-	  libsndfile1-dev unzip liblua5.2-dev liblua5.2-0  \
-          unixodbc-dev ntpdate libxml2-dev sngrep
+	  libsndfile1-dev unzip unixodbc-dev ntpdate libxml2-dev sngrep
+
+  ldconfig -p | grep libpcap.so
+  if [ $? -eq 1 ]; then install_libpcap
+  fi
 }
 
 install_db() {
@@ -62,6 +78,14 @@ install_module-ffmpeg() {
     libavresample-dev libavformat-dev libswscale-dev
 
   sudo apt install -y libx264-dev libvlc-dev
+}
+
+install_module-languages() {
+  # java
+  # TODO
+
+  # lua
+  sudo apt install -y liblua5.3-dev liblua5.2-dev liblua5.2-0
 }
 
 install_libks() {
@@ -112,23 +136,19 @@ install_spanDSP() {
 
 # need version 1.13+
 install_sofiaSip() {
-  local op=0
-  read -p "install sofia-sip? [Y/n] " op
-  case $op in
-    Y | y | 1) ;;
-    *) return 0
-  esac
+  local v="v1.13.17"
 
+  cd /usr/local/src
   if [ ! -d sofia-sip ]; then
-    git clone -b v1.13.17 --depth 1 https://github.com/freeswitch/sofia-sip.git
+    sudo git clone -b $v --depth 1 https://github.com/freeswitch/sofia-sip.git
   fi
   cd sofia-sip
-  ./bootstrap.sh
-  ./configure
-  make
+  sudo ./bootstrap.sh
+  sudo ./configure
+  sudo make
   sudo make install
   sudo ldconfig
-  cd ..
+  cd ~/Desktop
 }
 
 # ----- ----- ----- -----
@@ -138,6 +158,9 @@ check_env2
 
 install_db
 install_module-ffmpeg
+install_module-languages
+
+sudo apt autoremove -y
 
 # install libks first
 # use libks directly will match libksba
@@ -153,7 +176,9 @@ ldconfig -p | grep spandsp
 if [ $? -eq 1 ]; then install_spanDSP
 fi
 
-install_sofiaSip
+ldconfig -p | grep sofia-sip
+if [ $? -eq 1 ]; then install_sofiaSip
+fi
 
 cd ~/Desktop
 
