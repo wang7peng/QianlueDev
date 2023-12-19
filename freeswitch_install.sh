@@ -89,19 +89,13 @@ install_signalwire() {
   sudo cmake .
   sudo make
   sudo make install
+  sudo ldconfig 
   cd ~/Desktop
 }
 
 # need version 3.0+
 install_spanDSP() {
   sudo apt install -y libtiff-dev
-
-  local op=0
-  read -p "install spanDSP3? [Y/n] " op
-  case $op in
-    Y | y | 1) ;;
-    *) return 0
-  esac
   
   if [ ! -d spandsp ]; then
     git clone --depth 35 https://github.com/freeswitch/spandsp.git
@@ -133,6 +127,7 @@ install_sofiaSip() {
   ./configure
   make
   sudo make install
+  sudo ldconfig
   cd ..
 }
 
@@ -145,16 +140,20 @@ install_db
 install_module-ffmpeg
 
 # install libks first
-sudo ldconfig -p | grep libks
+# use libks directly will match libksba
+sudo ldconfig -p | grep libks2.so
 if [ $? -eq 1 ]; then install_libks
 fi
 
-sudo ldconfig && ldconfig -p | grep signalwire
+ldconfig -p | grep signalwire
 if [ $? -eq 1 ]; then install_signalwire
 fi
 
-#install_spanDSP
-#install_sofiaSip
+ldconfig -p | grep spandsp
+if [ $? -eq 1 ]; then install_spanDSP
+fi
+
+install_sofiaSip
 
 cd ~/Desktop
 
