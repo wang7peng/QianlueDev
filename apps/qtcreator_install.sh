@@ -8,6 +8,8 @@ sudo apt install -y libxcb-xinerama0-dev
 sudo apt install -y libxcb-cursor0
 # use cmd ggsetting
 sudo apt install -y libglib2.0-bin
+# it can find env of cmake when compile 
+sudo apt install -y libgl-dev
 
 ver="12.0.1"
 
