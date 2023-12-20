@@ -1,15 +1,19 @@
 #!/bin/bash
 
+# ----- ----- ----- ----- -----
+# platform: ubuntu20
 #
 # refer: www.cnblogs.com/tangm421/p/17622894.html
-
+#        computingforgeeks.com/how-to-install-freeswitch-pbx-on-ubuntu/
+# ----- ----- ----- ----- -----
 
 set -u
 
 # must exist: automake cmake
 check_tool() {
   sudo apt install -y autoconf automake yasm \
-	  python3-distutils
+	  build-essential libtool libtool-bin pkg-config \
+    python3-distutils
 
   cmake --version 1> /dev/null 2> /dev/null
   if [ $? -eq 127 ]; then echo "install cmake first!"; exit
@@ -50,17 +54,23 @@ install_libpcap() {
 
 check_env2() {
   sudo apt install -y \
-	libtool zlib1g-dev libcurl4-openssl-dev libpcre3-dev \
+        zlib1g-dev libcurl4-openssl-dev libpcre3-dev \
+       	libncurses5 libncurses5-dev libasound2-dev libgdbm-dev  \
        	libopus-dev libspeex-dev libspeexdsp-dev libldns-dev libssl-dev \
         libshout-dev libmpg123-dev libmp3lame-dev \
-       	libsndfile-dev libopus-dev libedit-dev libnode-dev
+       	libsndfile1-dev libopus-dev libedit-dev libnode-dev
 
   # picture
   sudo apt install -y \
 	  libtiff-dev libtiff5-dev libjpeg-dev
 
-  sudo apt install --yes build-essential pkg-config \
-	  libsndfile1-dev unzip unixodbc-dev ntpdate libxml2-dev sngrep
+  sudo apt install --yes build-essential \
+	  unzip unixodbc-dev ntpdate libxml2-dev sngrep
+
+  sudo apt install --yes e2fsprogs-l10n # it has uuid/uuid.h
+
+  sudo sudo apt install -y libexpat1-dev libogg-dev \
+    libgnutls28-dev libx11-dev libvorbis-dev 
 
   ldconfig -p | grep libpcap.so
   if [ $? -eq 1 ]; then install_libpcap
@@ -68,6 +78,7 @@ check_env2() {
 }
 
 install_db() {
+  sudo apt install -y libdb-dev unixodbc-dev
   sudo apt install -y \
 	  libpq-dev libpq5 \
 	  libmongoc-dev mariadb-server libsqlite3-dev
@@ -86,6 +97,7 @@ install_module-languages() {
 
   # lua
   sudo apt install -y liblua5.3-dev liblua5.2-dev liblua5.2-0
+  sudo apt install -y libperl-dev python-dev 
 }
 
 install_libks() {
@@ -151,20 +163,23 @@ install_sofiaSip() {
   cd ~/Desktop
 }
 
-# ----- ----- ----- -----
+# ----- ----- main ----- -----
 
-check_tool
-check_env2
+op=0
+read -p "never check env? [Y/n] " op
+case $op in
+  N | n | 0);;
+  *) check_tool; check_env2
+     install_db
+     install_module-ffmpeg
+     install_module-languages
 
-install_db
-install_module-ffmpeg
-install_module-languages
-
-sudo apt autoremove -y
+     sudo apt autoremove -y
+esac
 
 # install libks first
 # use libks directly will match libksba
-sudo ldconfig -p | grep libks2.so
+ldconfig -p | grep libks2.so
 if [ $? -eq 1 ]; then install_libks
 fi
 
@@ -182,11 +197,18 @@ fi
 
 cd ~/Desktop
 
-if [ ! -d freeswitch ]; then
-  git clone --depth 2 --branch v1.10 https://github.com/signalwire/freeswitch.git
+pkgName=freeswitch-1.10.10.-release.tar.xz
+if [ ! -f $pkgName ]; then wget --no-verbose \
+  https://files.freeswitch.org/freeswitch-releases/$pkgName
+fi
+if [ ! -d ${pkgName%.tar*} ]; then tar -xf $pkgName
 fi
 
-cd freeswitch
+#if [ ! -d freeswitch ]; then
+#  git clone --depth 2 --branch v1.10 https://github.com/signalwire/freeswitch.git
+#fi
+
+cd ${pkgName%.tar*}
 
 ./bootstrap.sh -j
 
@@ -206,6 +228,10 @@ sudo make cd-moh-install
 cd ..
 
 # setup env
+sudo rm /usr/local/bin/freeswitch /usr/local/bin/fs_cli
+sudo ln -s /usr/local/freeswitch/bin/freeswitch /usr/local/bin/
+sudo ln -s /usr/local/freeswitch/bin/fs_cli /usr/local/bin/
+
 echo "export PATH=\$PATH:/usr/local/freeswitch/bin" >> ~/.bashrc
 source ~/.bashrc
 
