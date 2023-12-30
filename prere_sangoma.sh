@@ -16,6 +16,13 @@ replace_gcc() {
     gcc --version | head --lines=1; return 0; 
   fi
 
+  local op=0
+  read -p "start update gcc? [Y/n] " op
+  case $op in
+    Y | y | 1) ;;
+    *) return 0;
+  esac
+
   yum install -y centos-release-scl
   yum install -y devtoolset-11-binutils devtoolset-11-gcc* 
   scl enable devtoolset-11 bash
@@ -28,6 +35,7 @@ replace_gcc() {
   ln -s /opt/rh/devtoolset-11/root/bin/g++ /usr/bin/g++
 
   echo "please source /etc/profile , then run this script again!"
+  exit
 }
 
 install_git() {
@@ -59,8 +67,9 @@ install_go() {
   rm -rf /usr/local/etc/go
   tar -C /usr/local/etc -xzf go1.21* 
 
-  echo 'PATH=$PATH:/usr/local/etc/go/bin' >> /etc/profile
+  echo 'export PATH=$PATH:/usr/local/etc/go/bin' >> /etc/profile
   echo "remember source /etc/profile, then run this script again!"
+  exit
 }
 
 # ----- ----- main ----- -----
