@@ -75,6 +75,8 @@ replace_make() {
   sudo ./configure
   make 
   sudo make install
+  # old make in /usr/bin/, suggest to del it
+  rm /usr/bin/make
   cd $pos
 }
 
@@ -94,6 +96,7 @@ install_python() {
   fi
   sudo tar -xf /opt/$pkgName -C /usr/local/src
 
+  yum install -y openssl-devel 
   local pos=`pwd`
   cd /usr/local/src/${pkgName%.tar*}
   ./configure --with-ssl
