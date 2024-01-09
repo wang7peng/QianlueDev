@@ -69,10 +69,10 @@ replace_make() {
   if [ ! -f /opt/$pkgName ]; then sudo wget --no-verbose -P /opt \
     https://ftp.gnu.org/gnu/make/$pkgName
   fi
-  tar -zxf /opt/$pkgName -C /usr/local/src
+  sudo tar -zxf /opt/$pkgName -C /usr/local/src
   local pos=`pwd`
   cd /usr/local/src/${pkgName%.tar*}
-  ./configure
+  sudo ./configure
   make 
   sudo make install
   cd $pos
@@ -89,10 +89,11 @@ install_python() {
 
   local ver="3.12.1"
   local pkgName=Python-$ver.tar.xz
-  if [ ! -f $pkgName ]; then wget --no-verbose -P /opt \
+  if [ ! -f /opt/$pkgName ]; then sudo wget --no-verbose -P /opt \
     https://www.python.org/ftp/python/${ver}/$pkgName
-    tar -xf /opt/$pkgName -C /usr/local/src
   fi
+  sudo tar -xf /opt/$pkgName -C /usr/local/src
+
   local pos=`pwd`
   cd /usr/local/src/${pkgName%.tar*}
   ./configure --with-ssl
