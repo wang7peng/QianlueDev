@@ -55,6 +55,52 @@ install_git() {
   make install 
 }
 
+# v3.82 => v4.4
+replace_make() {
+  make --version 1> /dev/null
+  if [ $? -eq 127 ]; then sudo yum reinstall -y make
+    replace_make
+  fi
+  local ver=$(make --version | head --lines=1 | awk '{print $3}')
+  if [[ $ver != "3.82" ]]; then return 0;
+  fi
+
+  local pkgName=make-4.4.1.tar.gz
+  if [ ! -f /opt/$pkgName ]; then sudo wget --no-verbose -P /opt \
+    https://ftp.gnu.org/gnu/make/$pkgName
+  fi
+  tar -zxf /opt/$pkgName -C /usr/local/src
+  local pos=`pwd`
+  cd /usr/local/src/${pkgName%.tar*}
+  ./configure
+  make 
+  sudo make install
+  cd $pos
+}
+
+# only python2.7.5 existed by default
+install_python() {
+  python3 --version 1> /dev/null &2> 1
+  if [ $? -ne 127 ]; then
+    local verMid=$(python3 --version | tr '.' ' ' | awk '{print $3}') 
+    if [ $verMid -gt 11 ]; then return 0;
+    fi
+  fi
+
+  local ver="3.12.1"
+  local pkgName=Python-$ver.tar.xz
+  if [ ! -f $pkgName ]; then wget --no-verbose -P /opt \
+    https://www.python.org/ftp/python/${ver}/$pkgName
+    tar -xf /opt/$pkgName -C /usr/local/src
+  fi
+  local pos=`pwd`
+  cd /usr/local/src/${pkgName%.tar*}
+  ./configure --with-ssl
+  make 
+  sudo make install
+  cd $pos
+}
+
 install_go() {
   go version 2> /dev/null
   if [ $? -ne 127 ]; then return 0; fi
@@ -73,8 +119,10 @@ install_go() {
 }
 
 # ----- ----- main ----- -----
-sudo yum install -y lrzsz
+sudo yum install -y lrzsz \
+  bison flex texinfo
 
+replace_make
 replace_gcc
 
 install_git
@@ -83,6 +131,8 @@ git config --global user.name "wangpeng"
 git config --global user.email "18795975517@163.com"
 git config --global http.sslVerify "false"
 git config --global core.autocrlf input
+
+install_python
 
 install_go
 
